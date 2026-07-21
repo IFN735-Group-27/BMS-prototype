@@ -1,0 +1,139 @@
+/**
+*System Name: Budget Management System
+*Module Name: prototype_ui
+*
+*Purpose of this file:
+*Shared prototype button and icon styles for consistent UI across HTML prototypes.
+*
+*Author: none
+*
+*Copyright (C) 2026
+*by the Department of Science and Technology - Central Office
+*
+*All rights reserved.
+*/
+
+.proto-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.proto-btn--primary {
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.proto-btn--outline-secondary {
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.btn-icon-danger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid color-mix(in oklch, var(--err, oklch(0.54 0.18 25)) 40%, var(--line, oklch(0.92 0.006 255)));
+	border-radius: var(--radius, 6px);
+	background: var(--err-bg, oklch(0.965 0.04 25));
+	color: var(--err, oklch(0.54 0.18 25));
+	transition: background var(--transition-fast, 120ms ease), border-color var(--transition-fast, 120ms ease), color var(--transition-fast, 120ms ease);
+}
+
+.btn-icon-danger:hover,
+.btn-icon-danger:focus-visible {
+	background: color-mix(in oklch, var(--err, oklch(0.54 0.18 25)) 12%, var(--err-bg, oklch(0.965 0.04 25)));
+	border-color: var(--err, oklch(0.54 0.18 25));
+	color: color-mix(in oklch, var(--err, oklch(0.54 0.18 25)) 85%, black);
+}
+
+.btn-icon-danger .proto-icon--trash {
+	display: block;
+}
+
+.btn-icon-edit {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid color-mix(in oklch, var(--brand, oklch(0.24 0.14 252)) 35%, var(--line, oklch(0.92 0.006 255)));
+	border-radius: var(--radius, 6px);
+	background: var(--brand-50, oklch(0.975 0.015 252));
+	color: var(--brand, oklch(0.24 0.14 252));
+	transition: background var(--transition-fast, 120ms ease), border-color var(--transition-fast, 120ms ease), color var(--transition-fast, 120ms ease);
+}
+
+.btn-icon-edit:hover,
+.btn-icon-edit:focus-visible {
+	background: color-mix(in oklch, var(--brand, oklch(0.24 0.14 252)) 10%, var(--brand-50, oklch(0.975 0.015 252)));
+	border-color: var(--brand, oklch(0.24 0.14 252));
+	color: color-mix(in oklch, var(--brand, oklch(0.24 0.14 252)) 85%, black);
+}
+
+.btn-icon-edit .proto-icon--pencil {
+	display: block;
+}
+
+.project-navigator__add {
+	margin-top: var(--space-3, 12px);
+}
+
+.project-nav-card__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.particular-detail-card__toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: var(--space-3, 12px);
+}
+
+.particular-detail-card__label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color-text-secondary, oklch(0.38 0.014 255));
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.line-item-row__actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex-shrink: 0;
+}
+
+.br-checklist__icon--complete {
+	background: var(--ok-bg, oklch(0.96 0.05 155));
+	color: var(--ok, oklch(0.54 0.14 155));
+	border: 1px solid color-mix(in oklch, var(--ok, oklch(0.54 0.14 155)) 35%, var(--line, oklch(0.92 0.006 255)));
+	border-radius: 50%;
+}
+
+.br-checklist__icon--complete .proto-icon--check {
+	display: block;
+}
+
+.br-checklist__icon--pending {
+	background: var(--err-bg, oklch(0.965 0.04 25));
+	color: var(--err, oklch(0.54 0.18 25));
+	border: 1px solid color-mix(in oklch, var(--err, oklch(0.54 0.18 25)) 35%, var(--line, oklch(0.92 0.006 255)));
+	border-radius: var(--radius, 6px);
+}
+
+.br-checklist__icon--pending .proto-icon--trash {
+	display: block;
+}

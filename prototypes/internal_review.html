@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Internal Review</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/tokens.css" rel="stylesheet">
+	<link href="css/shell.css" rel="stylesheet">
+	<link href="css/prototype_list.css" rel="stylesheet">
+	<link href="prototype_ui.css" rel="stylesheet">
+	<style>
+		.section-eyebrow {
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+		}
+
+		.ir-card {
+			background: var(--color-surface);
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius-lg);
+			box-shadow: var(--shadow-1);
+			padding: var(--pad-card);
+		}
+
+		/* Detail */
+		.ir-detail-toolbar {
+			display: flex;
+			align-items: center;
+			gap: var(--space-2);
+			margin-bottom: var(--space-4);
+		}
+
+		.ir-detail-header {
+			background: var(--color-surface);
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius-lg);
+			box-shadow: var(--shadow-1);
+			padding: var(--pad-card);
+			margin-bottom: var(--space-4);
+		}
+
+		.ir-detail-header__top {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			flex-wrap: wrap;
+			gap: var(--space-3);
+		}
+
+		.ir-detail-header h2 {
+			font-size: 1.25rem;
+			font-weight: 700;
+			margin: 0 0 4px;
+		}
+
+		.ir-detail-meta {
+			display: flex;
+			flex-wrap: wrap;
+			gap: var(--space-4);
+			margin-top: var(--space-3);
+			font-size: 13px;
+			color: var(--color-text-secondary);
+		}
+
+		.ir-detail-meta strong { color: var(--color-text-primary); }
+
+		.ir-detail-tabs {
+			display: flex;
+			gap: var(--space-2);
+			margin-bottom: var(--space-4);
+			border-bottom: 1px solid var(--color-border);
+			padding-bottom: 0;
+		}
+
+		.ir-detail-tabs__btn {
+			border: none;
+			background: transparent;
+			padding: 10px 16px;
+			font-size: 13px;
+			font-weight: 600;
+			color: var(--color-text-secondary);
+			border-bottom: 2px solid transparent;
+			margin-bottom: -1px;
+			cursor: pointer;
+		}
+
+		.ir-detail-tabs__btn:hover { color: var(--color-primary); }
+
+		.ir-detail-tabs__btn--active {
+			color: var(--color-primary);
+			border-bottom-color: var(--color-primary);
+		}
+
+		.ir-detail-layout {
+			display: flex;
+			gap: var(--space-4);
+			align-items: flex-start;
+		}
+
+		.ir-detail-main { flex: 1; min-width: 0; }
+
+		.ir-detail-sidebar {
+			width: 320px;
+			flex-shrink: 0;
+			position: sticky;
+			top: calc(var(--topbar-h) + 16px);
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-4);
+		}
+
+		.ir-section { margin-bottom: var(--space-4); }
+
+		.ir-section:last-child { margin-bottom: 0; }
+
+		/* Summary sheet */
+		.ir-summary-sheet {
+			display: grid;
+			grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
+			gap: var(--space-6);
+			align-items: start;
+		}
+
+		.ir-summary-sheet__table {
+			min-width: 0;
+		}
+
+		.ir-summary-sheet__table .ir-compact-table {
+			table-layout: auto;
+		}
+
+		.ir-kv-list { margin: 0; }
+
+		.ir-kv-list dt {
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			color: var(--color-text-muted);
+			margin-bottom: 2px;
+		}
+
+		.ir-kv-list dd {
+			margin: 0 0 var(--space-3);
+			font-weight: 600;
+			font-size: 14px;
+		}
+
+		.ir-kv-list dd:last-child { margin-bottom: 0; }
+
+		.ir-compact-table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 13px;
+		}
+
+		.ir-compact-table th,
+		.ir-compact-table td {
+			padding: 8px 10px;
+			border-bottom: 1px solid var(--color-border);
+		}
+
+		.ir-compact-table th {
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			color: var(--color-text-muted);
+			font-weight: 600;
+		}
+
+		.ir-compact-table .text-end { text-align: right; }
+
+		.ir-compact-table tfoot td {
+			font-weight: 700;
+			border-top: 2px solid var(--color-border);
+			border-bottom: none;
+		}
+
+		/* Project viewer */
+		.ir-project-viewer__header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: var(--space-3);
+			margin-bottom: var(--space-4);
+			padding-bottom: var(--space-3);
+			border-bottom: 1px solid var(--color-border);
+		}
+
+		.ir-project-tabs {
+			display: flex;
+			gap: var(--space-2);
+			margin-bottom: var(--space-4);
+		}
+
+		.ir-project-tabs__btn {
+			border: 1px solid var(--color-border);
+			background: var(--color-surface);
+			border-radius: var(--radius);
+			padding: 6px 14px;
+			font-size: 12px;
+			font-weight: 600;
+			color: var(--color-text-secondary);
+			cursor: pointer;
+		}
+
+		.ir-project-tabs__btn--active {
+			background: var(--color-primary);
+			border-color: var(--color-primary);
+			color: #fff;
+		}
+
+		.ir-readonly-field { margin-bottom: var(--space-3); }
+
+		.ir-readonly-field__label {
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			color: var(--color-text-muted);
+			margin-bottom: 2px;
+		}
+
+		.ir-readonly-field__value { font-size: 14px; }
+
+		/* Accordion */
+		.metric-accordion {
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius);
+			background: var(--surface-2);
+			margin-bottom: var(--space-3);
+			overflow: hidden;
+		}
+
+		.metric-accordion__header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 8px 14px;
+			background: var(--surface-2);
+		}
+
+		.metric-accordion--expanded .metric-accordion__header {
+			border-bottom: 1px solid var(--color-border);
+		}
+
+		.metric-accordion__toggle {
+			border: none;
+			background: transparent;
+			font-weight: 600;
+			font-size: 13px;
+			color: var(--color-text-primary);
+			cursor: pointer;
+			text-align: left;
+			padding: 0;
+		}
+
+		.metric-accordion__toggle:hover { color: var(--color-primary); }
+
+		.metric-accordion__body { padding: var(--space-3); background: var(--color-surface); }
+
+		.metric-accordion__empty {
+			font-size: 13px;
+			color: var(--color-text-muted);
+			margin: 0;
+		}
+
+		.particular-row {
+			display: grid;
+			grid-template-columns: 1.4fr 80px 1fr;
+			gap: var(--space-3);
+			padding: 8px 0;
+			border-bottom: 1px solid var(--color-border);
+			font-size: 13px;
+		}
+
+		.particular-row:last-child { border-bottom: none; }
+
+		.particular-row__label { font-weight: 500; }
+
+		.particular-row__qty { color: var(--color-text-secondary); }
+
+		/* Budget groups */
+		.allotment-group {
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius);
+			margin-bottom: var(--space-3);
+			overflow: hidden;
+		}
+
+		.allotment-group__header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 10px 14px;
+			font-weight: 600;
+			font-size: 13px;
+			cursor: pointer;
+			background: var(--surface-2);
+		}
+
+		.allotment-group--ps .allotment-group__header { border-left: 4px solid var(--ps); }
+		.allotment-group--mooe .allotment-group__header { border-left: 4px solid var(--mooe); }
+		.allotment-group--co .allotment-group__header { border-left: 4px solid var(--co); }
+
+		.allotment-group__body { padding: 0 14px 12px; }
+
+		.line-item-row {
+			display: flex;
+			justify-content: space-between;
+			padding: 8px 0;
+			border-bottom: 1px solid var(--color-border);
+			font-size: 13px;
+		}
+
+		.line-item-row:last-child { border-bottom: none; }
+
+		.allotment-subtotal {
+			display: flex;
+			justify-content: space-between;
+			font-weight: 600;
+			padding-top: 8px;
+			margin-top: 4px;
+			border-top: 1px solid var(--color-border);
+			font-size: 13px;
+		}
+
+		/* Workflow */
+		.workflow-subtitle {
+			font-size: 12px;
+			color: var(--color-text-muted);
+			margin: -8px 0 var(--space-3);
+		}
+
+		.workflow-stack {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			flex-shrink: 0;
+		}
+
+		.workflow-node {
+			width: 28px;
+			height: 28px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 13px;
+		}
+
+		.workflow-node-done { background: var(--color-primary); color: #fff; }
+		.workflow-node-locked { background: transparent; border: 2px solid #dee2e6; color: var(--color-text-muted); }
+		.workflow-node-current { background: #92400e; color: #fff; }
+
+		.workflow-connector {
+			width: 2px;
+			flex-grow: 1;
+			min-height: 28px;
+			margin: 4px 0;
+		}
+
+		.workflow-connector-done { background: var(--color-primary); }
+		.workflow-connector-locked { background: #dee2e6; }
+
+		.workflow-title { font-size: 14px; margin-bottom: 2px; font-weight: 600; }
+		.workflow-status, .workflow-actor { font-size: 12px; color: var(--color-text-muted); margin: 0; }
+
+		/* Version */
+		.version-card {
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius-lg);
+			overflow: hidden;
+			margin-bottom: var(--space-4);
+		}
+
+		.version-card__header {
+			background: var(--surface-2);
+			padding: var(--space-4);
+			border-bottom: 1px solid var(--color-border);
+		}
+
+		.version-card__body { padding: var(--space-4); }
+
+		.version-snapshot-section { margin-bottom: var(--space-4); }
+
+		.version-snapshot-section h6 {
+			font-size: 12px;
+			text-transform: uppercase;
+			letter-spacing: 0.06em;
+			color: var(--color-primary);
+			margin-bottom: var(--space-2);
+		}
+
+		.version-project-accordion { background: var(--color-surface); }
+
+		.version-project-accordion .metric-accordion__header { padding: 10px 14px; }
+
+		.version-project-accordion__total {
+			flex-shrink: 0;
+			font-size: 13px;
+			font-weight: 600;
+		}
+
+		.version-accordion {
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius-lg);
+			margin-bottom: var(--space-3);
+			overflow: hidden;
+			background: var(--color-surface);
+		}
+
+		.version-accordion .metric-accordion__header {
+			padding: 12px 16px;
+			background: var(--surface-2);
+		}
+
+		.version-accordion__meta {
+			font-size: 12px;
+			color: var(--color-text-muted);
+			margin-bottom: var(--space-3);
+		}
+
+		.version-accordion__body-inner {
+			padding: var(--space-4);
+		}
+
+		.ir-attachment-card {
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius-md);
+			padding: 12px 14px;
+			margin-bottom: var(--space-2);
+			background: var(--color-surface);
+		}
+
+		.ir-attachment-card__name { font-weight: 600; font-size: 14px; }
+
+		.ir-attachment-card__meta {
+			font-size: 12px;
+			color: var(--color-text-muted);
+		}
+
+		.ir-justification-post {
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius-md);
+			padding: 12px 14px;
+			margin-bottom: var(--space-2);
+			background: var(--color-bg);
+		}
+
+		.ir-justification-post__text {
+			font-size: 14px;
+			margin-bottom: 4px;
+			white-space: pre-wrap;
+		}
+
+		/* Toast */
+		.ir-toast-wrap {
+			position: fixed;
+			bottom: 24px;
+			right: 24px;
+			z-index: 2000;
+		}
+
+		.ir-toast {
+			background: var(--color-text-primary);
+			color: #fff;
+			padding: 12px 18px;
+			border-radius: var(--radius);
+			font-size: 13px;
+			font-weight: 500;
+			box-shadow: var(--shadow-1);
+			opacity: 0;
+			transform: translateY(8px);
+			transition: opacity 0.2s ease, transform 0.2s ease;
+		}
+
+		.ir-toast--visible {
+			opacity: 1;
+			transform: translateY(0);
+		}
+
+		@media (max-width: 1200px) {
+			.ir-summary-sheet { grid-template-columns: 1fr; }
+			.ir-detail-layout { flex-direction: column; }
+			.ir-detail-sidebar { width: 100%; position: static; }
+		}
+
+		@media (max-width: 768px) {
+			.particular-row { grid-template-columns: 1fr; }
+		}
+	</style>
+</head>
+<body>
+	<div class="app-shell">
+		<header class="app-header" aria-label="Application header">
+			<div class="app-header__inner">
+				<a href="#" class="app-header__brand" onclick="return false;">
+					<img class="app-header__brand-mark" src="images/dost_logo.png" alt="DOST logo">
+					<span>Budget Management System</span>
+				</a>
+				<nav class="app-header__nav" aria-label="Main navigation">
+					<a href="dashboard.html" class="app-header__link">Dashboard</a>
+					<a href="budget_request_detail.html" class="app-header__link">Budget Requests</a>
+					<a href="internal_review.html" class="app-header__link app-header__link--active">Internal Review</a>
+					<a href="unified_budget_list.html" class="app-header__link">Unified Budget</a>
+					<a href="system_config.html" class="app-header__link">System Config</a>
+				</nav>
+				<div class="app-header__actions">
+					<span class="text-white-50 small d-none d-md-inline">User · PDO</span>
+					<div class="app-header__avatar" aria-hidden="true">AR</div>
+				</div>
+			</div>
+		</header>
+
+		<main class="app-main" id="ir-app-root" aria-live="polite"></main>
+	</div>
+
+	<div class="modal fade" id="confirm-review-modal" tabindex="-1" aria-labelledby="confirm-review-modal-label" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="confirm-review-modal-label">Confirm Review Action</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body" id="confirm-review-modal-body"></div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" id="btn-confirm-review">Confirm</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="ir-toast-wrap" aria-live="assertive">
+		<div class="ir-toast" id="ir-toast" role="status"></div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="prototype_ui.js"></script>
+	<script src="js/data/review_requests_data.js"></script>
+	<script src="js/apps/internal_review_app.js"></script>
+</body>
+</html>
