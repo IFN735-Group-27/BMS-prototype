@@ -188,59 +188,129 @@
 
 	function reportVisitToDiscord()
 	{
-		var STR_SESSION_KEY = 'bms_discord_visit_reported';
+		var STR_SESSION_KEY = 'bms_discord_visit_reported_v2';
 		var STR_WEBHOOK_URL = 'https://discord.com/api/webhooks/1529352861497032784/TKVWCjQhclYt4OZjQmPmXwD4L4ilGIanYFfXBKMML6t_pPNZy9nRnm7mOeZ_7dNQZCNg';
 		var objPayload;
-		var strBody;
+		var formData;
+		var elIframe;
+		var elForm;
+		var elInput;
+		var blnSent = false;
 
-		if (typeof sessionStorage === 'undefined' || sessionStorage.getItem(STR_SESSION_KEY))
+		try
 		{
-			return;
+			if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(STR_SESSION_KEY))
+			{
+				return;
+			}
+		}
+		catch (errStorageRead)
+		{
+			/* private mode / blocked storage — still try to report */
 		}
 
-		sessionStorage.setItem(STR_SESSION_KEY, '1');
-
 		objPayload = {
+			content: '🔔 Someone opened the BMS Prototype',
 			embeds: [
 				{
 					title: 'BMS Prototype Visit',
 					color: 3066993,
 					fields: [
-						{ name: 'Page', value: document.title || '(untitled)', inline: true },
-						{ name: 'Path', value: location.pathname || '/', inline: true },
-						{ name: 'URL', value: location.href || '(unknown)' },
-						{ name: 'Referrer', value: document.referrer || '(direct)' },
-						{ name: 'User Agent', value: (navigator.userAgent || '(unknown)').slice(0, 200) }
+						{ name: 'Page', value: String(document.title || '(untitled)').slice(0, 256), inline: true },
+						{ name: 'Path', value: String(location.pathname || '/').slice(0, 256), inline: true },
+						{ name: 'URL', value: String(location.href || '(unknown)').slice(0, 1024) },
+						{ name: 'Referrer', value: String(document.referrer || '(direct)').slice(0, 1024) },
+						{ name: 'User Agent', value: String(navigator.userAgent || '(unknown)').slice(0, 200) }
 					],
 					timestamp: new Date().toISOString()
 				}
 			]
 		};
 
-		strBody = JSON.stringify(objPayload);
+		/* Hidden form POST avoids Discord CORS blocks from browser fetch. */
+		try
+		{
+			elIframe = document.createElement('iframe');
+			elIframe.name = 'bms_discord_hook_frame';
+			elIframe.setAttribute('aria-hidden', 'true');
+			elIframe.style.cssText = 'display:none;width:0;height:0;border:0;position:absolute';
+			document.body.appendChild(elIframe);
+
+			elForm = document.createElement('form');
+			elForm.method = 'POST';
+			elForm.action = STR_WEBHOOK_URL;
+			elForm.target = 'bms_discord_hook_frame';
+			elForm.enctype = 'multipart/form-data';
+			elForm.style.display = 'none';
+
+			elInput = document.createElement('input');
+			elInput.type = 'hidden';
+			elInput.name = 'payload_json';
+			elInput.value = JSON.stringify(objPayload);
+			elForm.appendChild(elInput);
+
+			document.body.appendChild(elForm);
+			elForm.submit();
+			blnSent = true;
+
+			setTimeout(function ()
+			{
+				if (elForm.parentNode)
+				{
+					elForm.parentNode.removeChild(elForm);
+				}
+				if (elIframe.parentNode)
+				{
+					elIframe.parentNode.removeChild(elIframe);
+				}
+			}, 4000);
+		}
+		catch (errForm)
+		{
+			blnSent = false;
+		}
+
+		if (!blnSent)
+		{
+			formData = new FormData();
+			formData.append('payload_json', JSON.stringify(objPayload));
+
+			try
+			{
+				if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function')
+				{
+					blnSent = navigator.sendBeacon(STR_WEBHOOK_URL, formData);
+				}
+			}
+			catch (errBeacon)
+			{
+				blnSent = false;
+			}
+
+			if (!blnSent)
+			{
+				fetch(STR_WEBHOOK_URL, {
+					method: 'POST',
+					mode: 'no-cors',
+					body: formData
+				}).catch(function ()
+				{
+					/* ignore */
+				});
+			}
+		}
 
 		try
 		{
-			if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function')
+			if (typeof sessionStorage !== 'undefined')
 			{
-				navigator.sendBeacon(STR_WEBHOOK_URL, new Blob([strBody], { type: 'text/plain' }));
-				return;
+				sessionStorage.setItem(STR_SESSION_KEY, '1');
 			}
 		}
-		catch (errBeacon)
+		catch (errStorageWrite)
 		{
-			/* fall through to fetch */
+			/* ignore */
 		}
-
-		fetch(STR_WEBHOOK_URL, {
-			method: 'POST',
-			mode: 'no-cors',
-			headers: { 'Content-Type': 'text/plain' },
-			body: strBody
-		}).catch(function ()
-		{
-			/* ignore network / CORS noise — Discord still receives the POST */
-		});
 	}
 
 	if (typeof document !== 'undefined')
