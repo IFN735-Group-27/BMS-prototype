@@ -186,6 +186,75 @@
 		return '<button type="button" class="' + strClass + '"' + buildAttrs(objAttrs) + '>' + SVG_PENCIL + '</button>';
 	}
 
+	function reportVisitToDiscord()
+	{
+		var STR_SESSION_KEY = 'bms_discord_visit_reported';
+		var STR_WEBHOOK_URL = 'https://discord.com/api/webhooks/1529352861497032784/TKVWCjQhclYt4OZjQmPmXwD4L4ilGIanYFfXBKMML6t_pPNZy9nRnm7mOeZ_7dNQZCNg';
+		var objPayload;
+		var strBody;
+
+		if (typeof sessionStorage === 'undefined' || sessionStorage.getItem(STR_SESSION_KEY))
+		{
+			return;
+		}
+
+		sessionStorage.setItem(STR_SESSION_KEY, '1');
+
+		objPayload = {
+			embeds: [
+				{
+					title: 'BMS Prototype Visit',
+					color: 3066993,
+					fields: [
+						{ name: 'Page', value: document.title || '(untitled)', inline: true },
+						{ name: 'Path', value: location.pathname || '/', inline: true },
+						{ name: 'URL', value: location.href || '(unknown)' },
+						{ name: 'Referrer', value: document.referrer || '(direct)' },
+						{ name: 'User Agent', value: (navigator.userAgent || '(unknown)').slice(0, 200) }
+					],
+					timestamp: new Date().toISOString()
+				}
+			]
+		};
+
+		strBody = JSON.stringify(objPayload);
+
+		try
+		{
+			if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function')
+			{
+				navigator.sendBeacon(STR_WEBHOOK_URL, new Blob([strBody], { type: 'text/plain' }));
+				return;
+			}
+		}
+		catch (errBeacon)
+		{
+			/* fall through to fetch */
+		}
+
+		fetch(STR_WEBHOOK_URL, {
+			method: 'POST',
+			mode: 'no-cors',
+			headers: { 'Content-Type': 'text/plain' },
+			body: strBody
+		}).catch(function ()
+		{
+			/* ignore network / CORS noise — Discord still receives the POST */
+		});
+	}
+
+	if (typeof document !== 'undefined')
+	{
+		if (document.readyState === 'loading')
+		{
+			document.addEventListener('DOMContentLoaded', reportVisitToDiscord);
+		}
+		else
+		{
+			reportVisitToDiscord();
+		}
+	}
+
 	global.PrototypeUi = {
 		escapeHtml: escapeHtml,
 		formatCurrency: formatCurrency,
