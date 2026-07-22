@@ -186,42 +186,73 @@
 		return '<button type="button" class="' + strClass + '"' + buildAttrs(objAttrs) + '>' + SVG_PENCIL + '</button>';
 	}
 
-	function reportVisitToDiscord()
+	var blnDiscordVisitSent = false;
+
+	function sendDiscordVisitReport(objGeo)
 	{
-		var STR_SESSION_KEY = 'bms_discord_visit_reported_v2';
 		var STR_WEBHOOK_URL = 'https://discord.com/api/webhooks/1529352861497032784/TKVWCjQhclYt4OZjQmPmXwD4L4ilGIanYFfXBKMML6t_pPNZy9nRnm7mOeZ_7dNQZCNg';
+		var strCountry = '(unknown)';
+		var strCity = '';
 		var objPayload;
 		var formData;
 		var elIframe;
 		var elForm;
 		var elInput;
 		var blnSent = false;
+		var arrFields;
 
-		try
+		if (blnDiscordVisitSent)
 		{
-			if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(STR_SESSION_KEY))
+			return;
+		}
+
+		blnDiscordVisitSent = true;
+
+		if (objGeo)
+		{
+			if (objGeo.country || objGeo.name)
 			{
-				return;
+				strCountry = [objGeo.name || objGeo.country, objGeo.country].filter(Boolean).join(' · ');
+			}
+			else if (objGeo.country_name || objGeo.country_code)
+			{
+				strCountry = [objGeo.country_name, objGeo.country_code].filter(Boolean).join(' · ');
+			}
+
+			if (objGeo.city)
+			{
+				strCity = String(objGeo.city);
+			}
+			else if (objGeo.region)
+			{
+				strCity = String(objGeo.region);
 			}
 		}
-		catch (errStorageRead)
+
+		arrFields = [
+			{ name: 'Country', value: String(strCountry).slice(0, 256), inline: true },
+			{ name: 'Page', value: String(document.title || '(untitled)').slice(0, 256), inline: true },
+			{ name: 'Path', value: String(location.pathname || '/').slice(0, 256), inline: true }
+		];
+
+		if (strCity)
 		{
-			/* private mode / blocked storage — still try to report */
+			arrFields.splice(1, 0, { name: 'City / Region', value: strCity.slice(0, 256), inline: true });
 		}
 
+		arrFields.push(
+			{ name: 'URL', value: String(location.href || '(unknown)').slice(0, 1024) },
+			{ name: 'Referrer', value: String(document.referrer || '(direct)').slice(0, 1024) },
+			{ name: 'User Agent', value: String(navigator.userAgent || '(unknown)').slice(0, 200) }
+		);
+
 		objPayload = {
-			content: '🔔 Someone opened the BMS Prototype',
+			content: '🔔 Someone opened the BMS Prototype from **' + String(strCountry).slice(0, 100) + '**',
 			embeds: [
 				{
 					title: 'BMS Prototype Visit',
 					color: 3066993,
-					fields: [
-						{ name: 'Page', value: String(document.title || '(untitled)').slice(0, 256), inline: true },
-						{ name: 'Path', value: String(location.pathname || '/').slice(0, 256), inline: true },
-						{ name: 'URL', value: String(location.href || '(unknown)').slice(0, 1024) },
-						{ name: 'Referrer', value: String(document.referrer || '(direct)').slice(0, 1024) },
-						{ name: 'User Agent', value: String(navigator.userAgent || '(unknown)').slice(0, 200) }
-					],
+					fields: arrFields,
 					timestamp: new Date().toISOString()
 				}
 			]
@@ -299,18 +330,51 @@
 				});
 			}
 		}
+	}
+
+	function reportVisitToDiscord()
+	{
+		var STR_SESSION_KEY = 'bms_discord_visit_reported_v3';
+		var objTimeoutId;
 
 		try
 		{
-			if (typeof sessionStorage !== 'undefined')
+			if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(STR_SESSION_KEY))
 			{
-				sessionStorage.setItem(STR_SESSION_KEY, '1');
+				return;
 			}
+
+			sessionStorage.setItem(STR_SESSION_KEY, '1');
 		}
-		catch (errStorageWrite)
+		catch (errStorage)
 		{
-			/* ignore */
+			/* private mode / blocked storage — still try to report */
 		}
+
+		objTimeoutId = setTimeout(function ()
+		{
+			sendDiscordVisitReport(null);
+		}, 2500);
+
+		fetch('https://get.geojs.io/v1/ip/geo.json', { method: 'GET' })
+			.then(function (objResponse)
+			{
+				if (!objResponse.ok)
+				{
+					throw new Error('geo lookup failed');
+				}
+
+				return objResponse.json();
+			})
+			.then(function (objGeo)
+			{
+				clearTimeout(objTimeoutId);
+				sendDiscordVisitReport(objGeo || null);
+			})
+			.catch(function ()
+			{
+				/* timeout fallback will send without country if not already sent */
+			});
 	}
 
 	if (typeof document !== 'undefined')
