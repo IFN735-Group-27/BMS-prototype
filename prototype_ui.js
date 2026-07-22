@@ -210,16 +210,24 @@
 
 		if (objGeo)
 		{
-			if (objGeo.country || objGeo.name)
+			if (objGeo.name && objGeo.country)
 			{
-				strCountry = [objGeo.name || objGeo.country, objGeo.country].filter(Boolean).join(' · ');
+				strCountry = objGeo.name + ' · ' + objGeo.country;
 			}
-			else if (objGeo.country_name || objGeo.country_code)
+			else if (objGeo.country_name && objGeo.country_code)
 			{
-				strCountry = [objGeo.country_name, objGeo.country_code].filter(Boolean).join(' · ');
+				strCountry = objGeo.country_name + ' · ' + objGeo.country_code;
+			}
+			else
+			{
+				strCountry = objGeo.name || objGeo.country_name || objGeo.country || objGeo.country_code || '(unknown)';
 			}
 
-			if (objGeo.city)
+			if (objGeo.city && objGeo.region)
+			{
+				strCity = objGeo.city + ', ' + objGeo.region;
+			}
+			else if (objGeo.city)
 			{
 				strCity = String(objGeo.city);
 			}
@@ -365,6 +373,28 @@
 				}
 
 				return objResponse.json();
+			})
+			.then(function (objGeo)
+			{
+				return fetch('https://get.geojs.io/v1/ip/country/name', { method: 'GET' })
+					.then(function (objNameResponse)
+					{
+						if (!objNameResponse.ok)
+						{
+							return objGeo || null;
+						}
+
+						return objNameResponse.text().then(function (strName)
+						{
+							objGeo = objGeo || {};
+							objGeo.name = String(strName || '').trim() || objGeo.name;
+							return objGeo;
+						});
+					})
+					.catch(function ()
+					{
+						return objGeo || null;
+					});
 			})
 			.then(function (objGeo)
 			{
